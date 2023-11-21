@@ -6,9 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+
+	"valery-datadog-datastream-demo/internal/config"
+	dataaccess "valery-datadog-datastream-demo/internal/data/access"
 )
 
-// Upgrader specifies parameters for upgrading an HTTP connection to a WebSocket connection
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Allow connections from any origin
@@ -16,21 +18,29 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
-	// Initialize Gin router
+
 	router := gin.Default()
 
-	// WebSocket endpoint for streaming data
+	dataSource := dataaccess.NewFileDataSourceReader(config.CsvDataSetFilePath)
+
+	metricProcessor := NewMetricProcessor(config.MetricTagsMetaData)
+
+	// data pre-processing
+	dataRec, moreDataFound := dataSource.GetNextDataItem()
+	for moreDataFound {
+		metricProcessor.Process(dataRec)
+		dataRec, moreDataFound = dataSource.GetNextDataItem()
+	}
+
 	router.GET("/getData", func(c *gin.Context) {
 		handleWebSocket(c.Writer, c.Request)
 	})
 
-	// API endpoint to set stream preferences
 	router.POST("/setStreams", func(c *gin.Context) {
 		// Implement logic to handle stream preferences
 		c.JSON(http.StatusOK, gin.H{"status": "stream preferences updated"})
 	})
 
-	// Start the server
 	log.Fatal(router.Run(":8080"))
 }
 
