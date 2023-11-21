@@ -7,7 +7,9 @@ import (
 type MetricDataProvider interface {
 	// We could potentially have time interval here as a parameter, but filtering
 	// by time is more complex, so for now we keep time interval constant
-	GetMetricDataPoints(filters []*data.Tag, timePartition TimePartitioner, aggregator Aggregator) []*data.TimeDataPoint
+	GetMetricDataPoints(filters []*data.Tag, timePartition TimePartitioner, aggregator Aggregator) []data.TimeDataPoint
+	// GetMetricNames() []string
+	GetMetricTagFilters(searchTerm string) []string
 }
 
 var _ MetricDataProvider = (*InMemoryMetricStreamProcessor)(nil)
@@ -18,6 +20,7 @@ func NewInMemoryMetricStreamProcessor() *InMemoryMetricStreamProcessor {
 	return &InMemoryMetricStreamProcessor{
 		allMetrics:    data.NewMetrics(),
 		taggedMetrics: make(map[string]map[string]*data.Metrics),
+		tagFilters:    NewTrieNode(),
 	}
 }
 
@@ -32,6 +35,8 @@ type InMemoryMetricStreamProcessor struct {
 
 	// nested map for tagged metrics: tagName -> tagValue -> TaggedMetrics
 	taggedMetrics map[string]map[string]*data.Metrics
+
+	tagFilters *TrieNode
 }
 
 // Process incoming data stream, build indices based on tags
@@ -55,6 +60,10 @@ func (mp *InMemoryMetricStreamProcessor) Process(dataRecord []string) error {
 		taggedMetrics.AddRecord(metricRecord)
 		tagValueMap[tag.Value()] = taggedMetrics
 		mp.taggedMetrics[tagName] = tagValueMap
+
+		// and also update metric tag-filters storage
+		filterStr := tag.AsFilter()
+		mp.tagFilters.AddWord(filterStr)
 	}
 
 	// add metric to the total collection
@@ -63,9 +72,16 @@ func (mp *InMemoryMetricStreamProcessor) Process(dataRecord []string) error {
 	return nil // no errors, we are done
 }
 
+// Returns key-value pairs of tagName:tagValue - available for filtering in the current data-set
+func (mp *InMemoryMetricStreamProcessor) GetMetricTagFilters(searchTerm string) []string {
+	filters := mp.tagFilters.GetWordsInOrder(searchTerm)
+	// todo: we might also add remaining tag:value pairs here
+	return filters
+}
+
 // Fetch data from the internal data structures, use indices to filter and aggregator to aggregate and prepare data points
 // we only implement filtering for now.
-func (mp *InMemoryMetricStreamProcessor) GetMetricDataPoints(filters []*data.Tag, timePartition TimePartitioner, aggregate Aggregator) []*data.TimeDataPoint {
+func (mp *InMemoryMetricStreamProcessor) GetMetricDataPoints(filters []*data.Tag, timePartition TimePartitioner, aggregate Aggregator) []data.TimeDataPoint {
 	// 1. We need to choose data to partition or aggregate
 	metrics := mp.getInputMetrics(filters)
 
@@ -73,7 +89,7 @@ func (mp *InMemoryMetricStreamProcessor) GetMetricDataPoints(filters []*data.Tag
 	partitionedMetrics := timePartition(metrics.MetricRecords())
 
 	// 3. aggregate using aggregator function
-	dataPoints := make([]*data.TimeDataPoint, len(partitionedMetrics))
+	dataPoints := make([]data.TimeDataPoint, len(partitionedMetrics))
 	i := 0
 	for pKey, partition := range partitionedMetrics {
 		dataPoints[i] = aggregate(pKey, partition)

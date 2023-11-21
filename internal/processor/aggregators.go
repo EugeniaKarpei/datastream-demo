@@ -5,13 +5,32 @@ import (
 	"valery-datadog-datastream-demo/internal/data"
 )
 
-type Aggregator func(time.Time, []*data.MetricRecord) *data.TimeDataPoint
+const (
+	SUM_AGGREGATOR   = "Sum"
+	COUNT_AGGREGATOR = "Count"
+	AVG_AGGREGATOR   = "Avg"
+)
 
-func CountAggregator(timestamp time.Time, metrics []*data.MetricRecord) *data.TimeDataPoint {
+func FromRequestAggregator(aggregator string) Aggregator {
+	switch aggregator {
+	case SUM_AGGREGATOR:
+		return SumAggregator
+	case AVG_AGGREGATOR:
+		return AvgAggregator
+	case COUNT_AGGREGATOR:
+		return CountAggregator
+	default:
+		return CountAggregator
+	}
+}
+
+type Aggregator func(time.Time, []*data.MetricRecord) data.TimeDataPoint
+
+func CountAggregator(timestamp time.Time, metrics []*data.MetricRecord) data.TimeDataPoint {
 	return data.NewTimeDataPoint(timestamp, float64(len(metrics)))
 }
 
-func SumAggregator(timestamp time.Time, metrics []*data.MetricRecord) *data.TimeDataPoint {
+func SumAggregator(timestamp time.Time, metrics []*data.MetricRecord) data.TimeDataPoint {
 	var sum = 0.0
 	for _, m := range metrics {
 		sum += m.MetricValue()
@@ -19,7 +38,7 @@ func SumAggregator(timestamp time.Time, metrics []*data.MetricRecord) *data.Time
 	return data.NewTimeDataPoint(timestamp, roundTo2DecimalPoints(sum))
 }
 
-func AvgAggregator(timestamp time.Time, metrics []*data.MetricRecord) *data.TimeDataPoint {
+func AvgAggregator(timestamp time.Time, metrics []*data.MetricRecord) data.TimeDataPoint {
 	var sum = 0.0
 	for _, m := range metrics {
 		sum += m.MetricValue()

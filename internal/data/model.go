@@ -8,6 +8,14 @@ import (
 	"valery-datadog-datastream-demo/internal/config"
 )
 
+func FromRequestFilters(requestFilters []string) []*Tag {
+	tags := make([]*Tag, len(requestFilters))
+	for i, filter := range requestFilters {
+		tags[i] = NewTagForFiltering(filter)
+	}
+	return tags
+}
+
 // Generate metric from CSV data record
 func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, Tags, error) {
 	id, err := parseInt(csvDataRecord[config.MetricIdColumnIndex])
@@ -106,10 +114,11 @@ func (metrics *Metrics) Len() int {
 
 // Tags
 
-func NewFilterTag(name string, value string) *Tag {
+func NewTagForFiltering(keyValueStr string) *Tag {
+	keyValuePair := strings.Split(keyValueStr, ":")
 	return &Tag{
-		name:  name,
-		value: value,
+		name:  keyValuePair[0],
+		value: keyValuePair[1],
 	}
 }
 
@@ -124,6 +133,10 @@ func (t *Tag) Name() string {
 
 func (t *Tag) Value() string {
 	return t.value
+}
+
+func (t *Tag) AsFilter() string {
+	return t.name + ":" + t.value
 }
 
 type Tags map[string]*Tag
