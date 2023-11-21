@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -8,7 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 
 	"valery-datadog-datastream-demo/internal/config"
-	dataaccess "valery-datadog-datastream-demo/internal/data/access"
+	"valery-datadog-datastream-demo/internal/data"
+	"valery-datadog-datastream-demo/internal/processor"
 )
 
 var upgrader = websocket.Upgrader{
@@ -18,18 +20,25 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
-
 	router := gin.Default()
 
-	dataSource := dataaccess.NewFileDataSourceReader(config.CsvDataSetFilePath)
+	dataSource := data.NewFileDataStream(config.CsvDataSetFilePath)
+	metricProcessor := processor.NewInMemoryMetricStreamProcessor()
 
-	metricProcessor := NewMetricProcessor(config.MetricTagsMetaData)
+	// stream csv data into the metric processor
+	dataSource.Stream(metricProcessor)
 
-	// data pre-processing
-	dataRec, moreDataFound := dataSource.GetNextDataItem()
-	for moreDataFound {
-		metricProcessor.Process(dataRec)
-		dataRec, moreDataFound = dataSource.GetNextDataItem()
+	dataPoints := metricProcessor.GetMetricDataPoints(
+		[]*data.Tag{
+			data.NewFilterTag("location", "Chicago"),
+			data.NewFilterTag("gender", "F"),
+		},
+		processor.MonthlyTimePartitioner,
+		processor.AvgAggregator,
+	)
+
+	for _, dp := range dataPoints {
+		fmt.Println("Prepared data-point > time:", dp.Timestamp(), " value:", dp.Value())
 	}
 
 	router.GET("/getData", func(c *gin.Context) {

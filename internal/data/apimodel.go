@@ -1,12 +1,24 @@
 package data
 
-// todo: serialize into json
-type TimeDataPoint struct {
-	timestamp int
-	points    []*DataPoint
+import "time"
+
+func NewTimeDataPoint(timestamp time.Time, value float64) *TimeDataPoint {
+	return &TimeDataPoint{
+		timestamp: timestamp.UnixMilli(),
+		value:     value,
+	}
 }
 
-type DataPoint struct {
-	name  string
-	value float64
+// todo: serialize into json
+type TimeDataPoint struct {
+	timestamp int64
+	value     float64
+}
+
+func (timeDataPoint *TimeDataPoint) Timestamp() int64 {
+	return timeDataPoint.timestamp
+}
+
+func (timeDataPoint *TimeDataPoint) Value() float64 {
+	return timeDataPoint.value
 }

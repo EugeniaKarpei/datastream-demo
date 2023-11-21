@@ -9,20 +9,20 @@ import (
 )
 
 // Generate metric from CSV data record
-func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, error) {
+func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, Tags, error) {
 	id, err := parseInt(csvDataRecord[config.MetricIdColumnIndex])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	timestamp, err := parseDate(csvDataRecord[config.MetricTimestampColumnIndex])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	metricValue, err := parseFloat64(csvDataRecord[config.MetricValueColumnIndex])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	tags := make(map[string]*Tag)
@@ -44,8 +44,7 @@ func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, error) {
 		timestamp: timestamp,
 		name:      config.MetricName,
 		value:     metricValue,
-		tags:      tags,
-	}, nil
+	}, tags, nil
 }
 
 // Main metric data structures
@@ -55,7 +54,6 @@ type MetricRecord struct {
 	timestamp time.Time
 	name      string
 	value     float64
-	tags      map[string]*Tag
 }
 
 func (metric *MetricRecord) Id() int {
@@ -74,27 +72,45 @@ func (metric *MetricRecord) MetricValue() float64 {
 	return metric.value
 }
 
-func (metric *MetricRecord) Tags() []string {
-	tagNames := make([]string, len(metric.tags))
-	i := 0
-	for tagName := range metric.tags {
-		tagNames[i] = tagName
-		i++
+// Collection of metrics with additional matching facilities
+
+func NewMetrics() *Metrics {
+	return &Metrics{
+		presenceData: make(map[int]interface{}),
+		records:      []*MetricRecord{},
 	}
-	return tagNames
 }
 
-func (metric *MetricRecord) HasTagWithAnyValue(tagName string) bool {
-	_, hasTag := metric.tags[tagName]
-	return hasTag
+type Metrics struct {
+	presenceData map[int]interface{}
+	records      []*MetricRecord
 }
 
-func (metric *MetricRecord) HasTagWithValue(tagName string, tagValue string) bool {
-	tag, hasTag := metric.tags[tagName]
-	if !hasTag {
-		return false
+func (metrics *Metrics) AddRecord(metricRecord *MetricRecord) {
+	metrics.presenceData[metricRecord.id] = nil
+	metrics.records = append(metrics.records, metricRecord)
+}
+
+func (metrics *Metrics) IsRecordPresent(metricRecordId int) bool {
+	_, present := metrics.presenceData[metricRecordId]
+	return present
+}
+
+func (metrics *Metrics) MetricRecords() []*MetricRecord {
+	return metrics.records
+}
+
+func (metrics *Metrics) Len() int {
+	return len(metrics.presenceData)
+}
+
+// Tags
+
+func NewFilterTag(name string, value string) *Tag {
+	return &Tag{
+		name:  name,
+		value: value,
 	}
-	return tag.Value() == tagValue
 }
 
 type Tag struct {
@@ -110,10 +126,7 @@ func (t *Tag) Value() string {
 	return t.value
 }
 
-type MetricValue struct {
-	id        int
-	timestamp time.Time
-}
+type Tags map[string]*Tag
 
 // helper functions
 
