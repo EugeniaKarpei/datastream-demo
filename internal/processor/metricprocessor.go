@@ -1,14 +1,36 @@
 package processor
 
+// Main entry point into metric data processing.
+//
+// MetricProcessor has 2 roles (implement 2 interfaces):
+//
+// 1. StreamProcessor - accepts data from input DataStream and partitions it using tags internally
+// We could potentially have things like
+// * flexible time intervals and
+// * metric names
+// here as parameters and part of the system, but for this demo we took it out of scope because filtering
+// by time is more complex.
+// At this point we keep time interval constant and stick to single metric.
+//
+// 2. MetricDataProvider - accepts API calls and provides data points for API clients.
+//
+// The design of MetricProcessor is based on nested map of
+//   map[tagName] -> map[tagValue] -> Metrics - which is a collection of metrics with another map inside
+// It allows us to have O(1) time for retrieval of metric records for 0 or 1 filters scenarios.
+// If number of filters > 1, we are merging metric data sets by iterating on the smallest of filtered data-sets. The complexity of this step is O(min(ni)) where ni - number of metric records within i-th filter partition.
+// It is possible to achieve O(n) performance for this step but it would cost substantial memory profile increase as we would need to pre-compute data sets for combined tags i.e. tag1:value1;tag2:value2;etc.
+//
+// After metrics retrieved we apply partition by time (using one of our static time partitioners) and aggregation.
+//
+// For filter search (/getFilters) we are using Trie data structure to be able to quickly retrieve all availble tag:value pairs. The complexity of this step is O(sn + tn) where sn - length of search term and tn - combined length of all tag:value strings that exist in our dataset.
+
 import (
 	"valery-datadog-datastream-demo/internal/data"
 )
 
+// Provide data to external users (for ex. - API handlers)
 type MetricDataProvider interface {
-	// We could potentially have time interval here as a parameter, but filtering
-	// by time is more complex, so for now we keep time interval constant
 	GetMetricDataPoints(filters []*data.Tag, timePartition TimePartitioner, aggregator Aggregator) []data.TimeDataPoint
-	// GetMetricNames() []string
 	GetMetricTagFilters(searchTerm string) []string
 }
 
@@ -74,7 +96,7 @@ func (mp *InMemoryMetricStreamProcessor) Process(dataRecord []string) error {
 
 // Returns key-value pairs of tagName:tagValue - available for filtering in the current data-set
 func (mp *InMemoryMetricStreamProcessor) GetMetricTagFilters(searchTerm string) []string {
-	filters := mp.tagFilters.GetWordsInOrder(searchTerm)
+	filters := mp.tagFilters.GetWordsInSubtrie(searchTerm)
 	// todo: we might also add remaining tag:value pairs here
 	return filters
 }

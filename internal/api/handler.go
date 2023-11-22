@@ -1,5 +1,8 @@
 package api
 
+// API request handler functions. Handle websocket request/response parsing and
+// calls MetricProcessor for the main logic.
+
 import (
 	"encoding/json"
 	"github.com/gorilla/websocket"
@@ -9,6 +12,7 @@ import (
 	"valery-datadog-datastream-demo/internal/processor"
 )
 
+// Handles /getData API call
 func HandleGetDataWebSocket(
 	metricDataProvider processor.MetricDataProvider,
 	upgrader websocket.Upgrader,
@@ -30,27 +34,29 @@ func HandleGetDataWebSocket(
 			break
 		}
 
+		// Parse json
 		var getDataReq data.GetDataRequest
 		if err := json.Unmarshal(message, &getDataReq); err != nil {
 			log.Println("Error unmarshaling request:", err)
 			continue
 		}
 
-		// Parse filtering, partitioning and aggregator from the request
+		// Convert apimodel -> common model entities to use them as parameters for the MetricProcessor
 		filters := data.FromRequestFilters(getDataReq.Filters)
 		partitioner := processor.FromRequestScale(getDataReq.Scale)
 		aggregator := processor.FromRequestAggregator(getDataReq.Aggregator)
 
-		// Fetch data points
+		// Fetch data points from MetricProcessor
 		dataPoints := metricDataProvider.GetMetricDataPoints(filters, partitioner, aggregator)
 
-		// Send data points back to the client
+		// Send data points to the client
 		if err = ws.WriteJSON(dataPoints); err != nil {
 			log.Println("Error sending data points:", err)
 		}
 	}
 }
 
+// Handles /getFilters API call
 func HandleGetFiltersWebSocket(
 	metricDataProvider processor.MetricDataProvider,
 	upgrader websocket.Upgrader,
@@ -72,16 +78,17 @@ func HandleGetFiltersWebSocket(
 			break
 		}
 
+		// Parse json
 		var getFiltersReq data.GetFiltersRequest
 		if err := json.Unmarshal(message, &getFiltersReq); err != nil {
 			log.Println("Error unmarshaling request:", err)
 			continue
 		}
 
-		// Fetch filters (tag name:value pairs)
+		// Fetch filters (tag name:value pairs) from MetricProcessor
 		filters := metricDataProvider.GetMetricTagFilters(getFiltersReq.Query)
 
-		// Send data points back to the client
+		// Send data points to the client
 		if err = ws.WriteJSON(filters); err != nil {
 			log.Println("Error sending data points:", err)
 		}

@@ -1,10 +1,13 @@
 package config
 
+// Configuration metadate about CSV-dataset which is used in this demo.
+
 const CsvDataSetFilePath = "./data/dataset.csv"
 
+// Metadata constants
 var (
 	MetricName                 = "online.spent"
-	MetricIdColumnIndex        = 0  // Avg_Price
+	MetricIdColumnIndex        = 0  // Avg_Price column
 	MetricValueColumnIndex     = 11 // Avg_Price
 	MetricTimestampColumnIndex = 6  // Transation_Date
 
@@ -31,16 +34,6 @@ var (
 		},
 	}
 )
-
-func TagNames() []string {
-	tagNames := make([]string, len(MetricTagsMetaData))
-	i := 0
-	for tagName := range MetricTagsMetaData {
-		tagNames[i] = tagName
-		i++
-	}
-	return tagNames
-}
 
 type CsvRecordMetaData struct {
 	ColumnIndex int // 1-based

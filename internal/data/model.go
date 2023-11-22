@@ -1,5 +1,13 @@
 package data
 
+// Here we have main model entities such as
+// * MetricRecord
+// * Metrics
+// * Tag
+// * Tags
+// And also few helper functions for CSV data parsing + few functions helping to conver apimodel data into main model
+// entities.
+
 import (
 	"errors"
 	"strconv"
@@ -8,6 +16,7 @@ import (
 	"valery-datadog-datastream-demo/internal/config"
 )
 
+// Create set of Tags from the request filter strings (name:value)
 func FromRequestFilters(requestFilters []string) []*Tag {
 	tags := make([]*Tag, len(requestFilters))
 	for i, filter := range requestFilters {
@@ -16,7 +25,7 @@ func FromRequestFilters(requestFilters []string) []*Tag {
 	return tags
 }
 
-// Generate metric from CSV data record
+// Generate metric record and tags from the CSV data record
 func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, Tags, error) {
 	id, err := parseInt(csvDataRecord[config.MetricIdColumnIndex])
 	if err != nil {
@@ -55,8 +64,9 @@ func FromCsvDataRecord(csvDataRecord []string) (*MetricRecord, Tags, error) {
 	}, tags, nil
 }
 
-// Main metric data structures
+// *** Main metric data structures ***
 
+// Represent original metric data point without tags i.e. id, time, name, value
 type MetricRecord struct {
 	id        int
 	timestamp time.Time
@@ -80,8 +90,7 @@ func (metric *MetricRecord) MetricValue() float64 {
 	return metric.value
 }
 
-// Collection of metrics with additional matching facilities
-
+// Collection of metrics with additional matching functionality that is necessary for filtering and partitioning
 func NewMetrics() *Metrics {
 	return &Metrics{
 		presenceData: make(map[int]interface{}),
@@ -90,7 +99,7 @@ func NewMetrics() *Metrics {
 }
 
 type Metrics struct {
-	presenceData map[int]interface{}
+	presenceData map[int]interface{} // used to be able to quickly tell if some record is present in the collection
 	records      []*MetricRecord
 }
 
@@ -99,11 +108,13 @@ func (metrics *Metrics) AddRecord(metricRecord *MetricRecord) {
 	metrics.records = append(metrics.records, metricRecord)
 }
 
+// O(1) verifiation if metric with given id is present in the collection
 func (metrics *Metrics) IsRecordPresent(metricRecordId int) bool {
 	_, present := metrics.presenceData[metricRecordId]
 	return present
 }
 
+// Returns collection of records
 func (metrics *Metrics) MetricRecords() []*MetricRecord {
 	return metrics.records
 }
@@ -112,8 +123,9 @@ func (metrics *Metrics) Len() int {
 	return len(metrics.presenceData)
 }
 
-// Tags
+// *** Tags ***
 
+// Create Tag from given name:value string
 func NewTagForFiltering(keyValueStr string) *Tag {
 	keyValuePair := strings.Split(keyValueStr, ":")
 	return &Tag{
@@ -139,11 +151,12 @@ func (t *Tag) AsFilter() string {
 	return t.name + ":" + t.value
 }
 
+// A collection of tags used during metric data records parsing.
 type Tags map[string]*Tag
 
-// helper functions
+// *** Helper functions ***
 
-// returns error if strField is empty
+// Returns error if strField is empty
 func parseFloat64(strField string) (float64, error) {
 	if len(strField) == 0 {
 		return float64(0.0), errors.New("Metric value CSV field is empty")
@@ -151,7 +164,7 @@ func parseFloat64(strField string) (float64, error) {
 	return strconv.ParseFloat(strField, 2)
 }
 
-// if the value is with floating point, rounds to int
+// If the value is with floating point, rounds to int
 func parseInt(strField string) (int, error) {
 	if len(strField) == 0 {
 		return int(0.0), errors.New("Metric value CSV field is empty")
@@ -163,7 +176,7 @@ func parseInt(strField string) (int, error) {
 	return strconv.Atoi(strField)
 }
 
-// returns error if there is no data to parse
+// Returns error if there is no data to parse
 func parseDate(strField string) (time.Time, error) {
 	if len(strField) == 0 {
 		return time.Now(), errors.New("Metric timestamp field is empty")

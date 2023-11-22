@@ -1,5 +1,8 @@
 package processor
 
+// Functions to partition metrics data by time into chunks to prepare them for aggregation.
+// This step as well as aggregation can benefit from parallelization.
+
 import (
 	"time"
 	"valery-datadog-datastream-demo/internal/data"
@@ -11,6 +14,8 @@ const (
 	MONTHLY_SCALE = "Monthly"
 )
 
+// Currently we support only static time partitioning but potentially we could implement dynamic ones based
+// on data interval and desired number of data-points.
 func FromRequestScale(scale string) TimePartitioner {
 	switch scale {
 	case DAILY_SCALE:

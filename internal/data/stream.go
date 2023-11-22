@@ -1,5 +1,10 @@
 package data
 
+// Main interfaces for data access:
+// * DataStream
+// * StreamProcessor
+// Main goal is to decouple stream source from the processor so that they do not know anything about each other.
+
 import (
 	"encoding/csv"
 	"io"
@@ -28,6 +33,7 @@ type FileDataStream struct {
 	filePath string
 }
 
+// Streams data into the processor
 func (fds *FileDataStream) Stream(processor StreamProcessor) {
 	file, err := os.Open(fds.filePath)
 	if err != nil {

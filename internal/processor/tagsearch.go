@@ -1,5 +1,8 @@
 package processor
 
+// Here we have trie to quickly search for tag-filters (name:value) pairs. This data structure is used in
+// MetricsProcessor and gets populated when we see new tags on metrics.
+
 import "bytes"
 
 func NewTrieNode() *TrieNode {
@@ -13,6 +16,7 @@ type TrieNode struct {
 	isLeaf bool
 }
 
+// Add word to the trie
 func (node *TrieNode) AddWord(word string) {
 	if len(word) == 0 {
 		node.isLeaf = true
@@ -28,7 +32,8 @@ func (node *TrieNode) AddWord(word string) {
 	nextNode.AddWord(word[1:])
 }
 
-func (node *TrieNode) GetWordsInOrder(searchTerm string) []string {
+// Get all words stored in the subtrie of the current node
+func (node *TrieNode) GetWordsInSubtrie(searchTerm string) []string {
 	return traverse(node, "", searchTerm)
 }
 

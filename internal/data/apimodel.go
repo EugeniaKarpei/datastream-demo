@@ -2,14 +2,16 @@ package data
 
 import "time"
 
-// Request protocol
+// Request / reponse protocol entities
 
+// /getData request
 type GetDataRequest struct {
 	Filters    []string `json:"filters"` // in the format of "tagName:tagValue"
 	Scale      string   `json:"scale"`
 	Aggregator string   `json:"aggregator"`
 }
 
+// /getFilters request
 type GetFiltersRequest struct {
 	Query string `json:"query"`
 }

@@ -1,5 +1,8 @@
 package main
 
+// Test client, simulates requests to service endpoints and prints responses to standard output.
+// Used for testing locally.
+
 import (
 	"encoding/json"
 	"fmt"
@@ -11,7 +14,7 @@ import (
 const SERVICE_BASE_URL = "ws://localhost:8080"
 
 func main() {
-	// test /getData API
+	// Test /getData API
 	jsonReq, err := json.Marshal(data.GetDataRequest{
 		Filters: []string{
 			"location:Chicago",
@@ -24,7 +27,7 @@ func main() {
 	}
 	testApi(SERVICE_BASE_URL+"/getData", jsonReq)
 
-	// test /getFilters API
+	// Test /getFilters API
 	jsonReq, err = json.Marshal(data.GetFiltersRequest{
 		Query: "gen",
 	})

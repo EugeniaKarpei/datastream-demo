@@ -1,5 +1,8 @@
 package processor
 
+// Aggregator functions, used to aggregate batches of time-partitioned data as a final step of data-point preparation.
+// We support several types of aggregators here. Potentially, we can make complicated custom aggregators as well.
+
 import (
 	"time"
 	"valery-datadog-datastream-demo/internal/data"
