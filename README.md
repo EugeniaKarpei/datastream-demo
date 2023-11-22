@@ -15,8 +15,8 @@ To start test client, run:
 
 * **cmd**
 
-  * **server**            - this is where server starter lives
-  * **testclient**        - test client in Go, hitting locally started service API-s: /getData and /getFilters
+  * **server**            - this is where [server starter](https://github.com/vkarpei/valery-datadog-datastream-demo/blob/master/cmd/server/main.go) lives
+  * **testclient**        - [test client](https://github.com/vkarpei/valery-datadog-datastream-demo/blob/master/cmd/testclient/main.go) in Go, hitting locally started service API-s: /getData and /getFilters
 
 * **data**                - test dataset as a csv - some random online sales transactions for 2019. I like this
                             dataset becasuse it has trx dates and can be aggregated by time and few other fields
