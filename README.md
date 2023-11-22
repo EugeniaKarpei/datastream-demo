@@ -1,6 +1,14 @@
 # valery-datadog-datastream-demo
 
-This project is a little demo of how I would approach handling metric charts with tags on them, doing filtering/partitioning/aggregations by tags and time periods and plotting charts similarly to how DataDog API web client works.
+This project is a little demo of how I would approach handling metric charts with tags on them, doing filtering/partitioning/aggregations by tags and time periods similarly (very-very simlpified version) to how DataDog API backend works.
+
+To start this demo service locally, run from the project root dir:
+
+`go run cmd/server/main.go`
+
+To start test client, run:
+
+`go run cmd/testclient/main.go`
 
 # Project structure
 
@@ -12,9 +20,7 @@ This project is a little demo of how I would approach handling metric charts wit
 
 * **data**                - test dataset as a csv - some random online sales transactions for 2019. I like this
                             dataset becasuse it has trx dates and can be aggregated by time and few other fields
-                            such as gender, location, product_catefory, coupon_status, coupon_code
-
-* **frontend**            - react project with all frontend code
+                            such as **gender**, **location**, **product_catefory**, **coupon_status**, **coupon_code**
 
 * **internal**            - backend, the most interesting part
 

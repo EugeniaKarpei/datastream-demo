@@ -13,25 +13,52 @@ import (
 
 const SERVICE_BASE_URL = "ws://localhost:8080"
 
-func main() {
-	// Test /getData API
-	jsonReq, err := json.Marshal(data.GetDataRequest{
+var TestGetDataRequests = []data.GetDataRequest{
+	{
 		Filters: []string{
 			"location:Chicago",
 			"gender:F",
 		},
-		Scale: "Weekly",
-	})
-	if err != nil {
-		log.Fatal("error marshaling JSON:", err)
+		Scale:      "Weekly",
+		Aggregator: "Sum",
+	},
+	{
+		Filters: []string{
+			"location:California",
+		},
+		Scale:      "Daily",
+		Aggregator: "Count",
+	},
+	{
+		Filters: []string{
+			"coupon_status:Not Used",
+		},
+		Scale:      "Monthly",
+		Aggregator: "Avg",
+	},
+}
+
+var TestGetFiltersRequest = []data.GetFiltersRequest{
+	{
+		Query: "loc", // should return all locations
+	},
+	{
+		Query: "coup", // should return both all coupon codes and statuses
+	},
+}
+
+func main() {
+	// Test /getData API
+	for _, req := range TestGetDataRequests {
+		jsonReq, _ := json.Marshal(req)
+		testApi(SERVICE_BASE_URL+"/getData", jsonReq)
 	}
-	testApi(SERVICE_BASE_URL+"/getData", jsonReq)
 
 	// Test /getFilters API
-	jsonReq, err = json.Marshal(data.GetFiltersRequest{
-		Query: "gen",
-	})
-	testApi(SERVICE_BASE_URL+"/getFilters", jsonReq)
+	for _, req := range TestGetFiltersRequest {
+		jsonReq, _ := json.Marshal(req)
+		testApi(SERVICE_BASE_URL+"/getFilters", jsonReq)
+	}
 }
 
 func testApi(apiUrl string, jsonReq []byte) {
