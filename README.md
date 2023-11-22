@@ -22,10 +22,11 @@ This project is a little demo of how I would approach handling metric charts wit
   * config            // mostly some metadata related to csv dataset parsing
   * data              // data model (api, metrics, tags) + csv file reader
   * processor         // core of metric processing:
-                      // * _MetricProcessor_ with all internal datastructures supporting filtering by tags
-                      // * _partitioners_ to partition data into time-chunks and prepare for aggregation
-                      // * _aggregators_ to aggregate the data
-                      // * _triesearch_ - small Trie-based datastructure to search for tag names and values
+    
+     * _MetricProcessor_  // with all internal datastructures supporting filtering by tags
+     * _partitioners_     // to partition data into time-chunks and prepare for aggregation
+     * _aggregators_      // to aggregate the data
+     * _triesearch_ -     // small Trie-based datastructure to search for tag names and values
 
 * Dockerfile          // Deployment file.
 
