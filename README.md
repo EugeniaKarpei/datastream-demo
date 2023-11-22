@@ -2,7 +2,7 @@
 
 This project is a little demo of how I would approach handling metric charts with tags on them, doing filtering/partitioning/aggregations by tags and time periods and plotting charts similarly to how DataDog API web client works.
 
-**Project structure**
+# Project structure
 
 
 * cmd
@@ -34,7 +34,7 @@ The backend is implemented as a web-socket service that potentially is able to h
 
 The frontend is a simple 1-page react app with chart component and few input fields.
 
-**How metrics retrieval by tags works**
+# How metrics retrieval by tags works
 
 In order to provide fast metric lookup by tag:value pair we pre-compute tagged metrics as a nested map of
 
@@ -62,7 +62,7 @@ Final step is aggregation of time-partitioned data. We support several aggregati
 * Avg
 They are pretty straightforward in this demo, but this is another step that can be parallelised.
 
-**How tag names search works**
+# How tag names search works
 
 We are using a Trie data structure to store all tag name:value pairs in it to be able to quickly get list of tags and values by given name:value prefix.
 
