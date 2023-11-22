@@ -4,30 +4,30 @@ This project is a little demo of how I would approach handling metric charts wit
 
 **Project structure**
 
-|
-|- cmd
-|   |
-|   |- server         // this is where server starter lives
-|   |- testclient     // test client in Go, hitting locally started service API-s: /getData and /getFilters
-|
-|- data               // test dataset as a csv - some random online sales transactions for 2019. I like this
-|                     // dataset becasuse it has trx dates and can be aggregated by time and few other fields
-|                     // such as gender, location, product_catefory, coupon_status, coupon_code
-|
-|- frontend           // react project with all frontend code
-|
-|- internal           // backend, the most interesting part
-|   |
-|   |- api            // API endpoint handlers
-|   |- config         // mostly some metadata related to csv dataset parsing
-|   |- data           // data model (api, metrics, tags) + csv file reader
-|   |- processor      // core of metric processing:
-|                     // * _MetricProcessor_ with all internal datastructures supporting filtering by tags
-|                     // * _partitioners_ to partition data into time-chunks and prepare for aggregation
-|                     // * _aggregators_ to aggregate the data
-|                     // * _triesearch_ - small Trie-based datastructure to search for tag names and values
-|
-|- Dockerfile         // Deployment file.
+
+* cmd
+
+  * server            // this is where server starter lives
+  * testclient        // test client in Go, hitting locally started service API-s: /getData and /getFilters
+
+* data                // test dataset as a csv - some random online sales transactions for 2019. I like this
+                      // dataset becasuse it has trx dates and can be aggregated by time and few other fields
+                      // such as gender, location, product_catefory, coupon_status, coupon_code
+
+* frontend            // react project with all frontend code
+
+* internal            // backend, the most interesting part
+
+  * api               // API endpoint handlers
+  * config            // mostly some metadata related to csv dataset parsing
+  * data              // data model (api, metrics, tags) + csv file reader
+  * processor         // core of metric processing:
+                      // * _MetricProcessor_ with all internal datastructures supporting filtering by tags
+                      // * _partitioners_ to partition data into time-chunks and prepare for aggregation
+                      // * _aggregators_ to aggregate the data
+                      // * _triesearch_ - small Trie-based datastructure to search for tag names and values
+
+* Dockerfile          // Deployment file.
 
 The backend is implemented as a web-socket service that potentially is able to handle real-time data streams. I used [gorilla/websocket](https://github.com/gorilla/websocket)https://github.com/gorilla/websocket as a server and [GIN](https://github.com/gin-gonic/gin)https://github.com/gin-gonic/gin as http router.
 
