@@ -6,9 +6,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"log"
 	"valery-datadog-datastream-demo/internal/data"
+
+	"github.com/gorilla/websocket"
 )
 
 const SERVICE_BASE_URL = "ws://localhost:8080"

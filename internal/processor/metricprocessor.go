@@ -25,6 +25,7 @@ package processor
 // For filter search (/getFilters) we are using Trie data structure to be able to quickly retrieve all availble tag:value pairs. The complexity of this step is O(sn + tn) where sn - length of search term and tn - combined length of all tag:value strings that exist in our dataset.
 
 import (
+	"sort"
 	"valery-datadog-datastream-demo/internal/data"
 )
 
@@ -117,6 +118,11 @@ func (mp *InMemoryMetricStreamProcessor) GetMetricDataPoints(filters []*data.Tag
 		dataPoints[i] = aggregate(pKey, partition)
 		i++
 	}
+
+	// 4. sort result data points by timestamp
+	sort.Slice(dataPoints, func(i, j int) bool {
+		return dataPoints[i].Timestamp < dataPoints[j].Timestamp
+	})
 	return dataPoints
 }
 
