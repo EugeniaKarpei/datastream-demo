@@ -7,7 +7,6 @@ const FilterContext = createContext()
 export { FilterContext }
 
 export default function Filter({children, filters}){
-    // const [open, setOpen] = useState(false)
     const [inputValue, setInputValue] = useState("")
 
     useEffect(() => {
