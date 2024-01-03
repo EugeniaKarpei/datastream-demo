@@ -1,0 +1,142 @@
+
+:root {
+  --second-color: #0324c7ca;
+}
+
+
+body {
+  margin: 0 1rem;
+  font-family: 'PT Mono', monospace;
+  color: #1c1c1c;
+  font-size: 0.8rem;
+  height: 100vh;
+}
+
+header {
+  width: 100%;
+  margin: 2.25em 0 1em;
+  height: 2rem;
+}
+
+.chart-description {
+  text-align: center;
+}
+
+.git_icon {
+  height: 100%;
+  width: 5.5%;
+  color:#1c1c1c;
+  max-width: 60px;
+  margin-left: 1.5rem;
+}
+
+.git_icon:hover {
+  color: var(--second-color);
+}
+
+main {
+  padding: 2.25rem 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.chart-container {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.scale-container {
+  width: 58%;
+  margin: 2rem 4rem 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.scale-container p {
+  margin: 0;
+}
+
+.filter-container {
+  margin: 2rem 0 1rem 4rem;
+}
+
+.filter-items-container, .filter-item {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-items-container {
+  padding-bottom: 0.5rem;
+  width: 100%;
+}
+
+.filter-item {
+  border: 1px solid #cccccc;
+  background-color: #f2f2f2;
+  border-radius: 3px;
+}
+
+.filter-item p {
+  margin: 0;
+  padding: 0.25rem 0 0.25rem 0.5rem;
+}
+
+.remove-filter-btn {
+  width: 30px;
+  height: 15px;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
+
+.filter-input, .filter-dropdown {
+  width: 60%;
+  border: 1px solid #ccc;
+  padding: 0.5rem 1rem;
+  font-family: 'PT Mono', monospace;
+  color: #1c1c1c;
+}
+
+.filter-input {
+  margin-bottom: 0.25rem;
+}
+
+.filter-dropdown {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.dropdown-item {
+  padding: 0.5rem 0;
+}
+
+.dropdown-item:hover, .scale-item:hover {
+  cursor: pointer;
+  color:  var(--second-color);
+}
+
+.scale-item {
+  text-transform: lowercase;
+}
+
+.selected {
+  color: var(--second-color);
+  text-decoration: underline;
+}
+
+@media (min-width: 950px){
+  body {
+    font-size: 0.875rem;
+  }
+
+  .filter-input, .filter-dropdown, .scale-container {
+    width: 48%;
+  }
+}
+
+@media (min-width: 1190px){
+  .filter-input, .filter-dropdown, .scale-container {
+    width: 40%;
+  }
+}
