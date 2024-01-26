@@ -25,7 +25,7 @@ export default function FilterDropdown(){
           })
         }
     
-      }, [open, inputValue])
+      }, [open, inputValue, sendJsonMessage, readyState])
 
       useEffect(() => {
         if (lastJsonMessage){

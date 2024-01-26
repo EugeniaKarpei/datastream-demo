@@ -46,9 +46,19 @@ function App() {
       });
     }
 
-  }, [readyState, currentScale, currentAggregateByItem, filters])
+  }, [readyState, currentScale, currentAggregateByItem, filters, sendJsonMessage])
 
   useEffect(() => {
+
+    function getScale(timestamp){
+      const date = new Date(timestamp)
+      if (currentScale === "Monthly"){
+        return date.getMonth() + 1
+      }else {
+        return `${date.getDate()}/${date.getMonth() + 1}`
+      }
+    }
+
     if (lastJsonMessage){
       const newData = lastJsonMessage.map(item => {
         return {
@@ -60,16 +70,7 @@ function App() {
       setData((prev) => prev = newData)
     }
 
-  }, [lastJsonMessage])
-
-  function getScale(timestamp){
-    const date = new Date(timestamp)
-    if (currentScale === "Monthly"){
-      return date.getMonth() + 1
-    }else {
-      return `${date.getDate()}/${date.getMonth() + 1}`
-    }
-  }
+  }, [lastJsonMessage, currentScale])
 
   function renderScaleByItems(){
     return scaleItems.map((item) => {
